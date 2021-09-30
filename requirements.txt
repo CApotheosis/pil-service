@@ -22,3 +22,4 @@ python-multipart==0.0.5
 Jinja2==3.0.1
 setuptools==56.0.0
 mangum==0.12.2
+boto3==1.18.51

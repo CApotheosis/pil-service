@@ -117,7 +117,7 @@ dmypy.json
 .idea
 
 # web driver for selenium
-api/chromedriver.exe
+src/chromedriver.exe
 /chromedriver.exe
 /chromedriver
 
