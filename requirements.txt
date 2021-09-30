@@ -21,3 +21,4 @@ simplejson==3.16.0
 python-multipart==0.0.5
 Jinja2==3.0.1
 setuptools==56.0.0
+mangum==0.12.2
