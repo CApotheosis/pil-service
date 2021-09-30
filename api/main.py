@@ -9,4 +9,5 @@ app = FastAPI()
 async def root():
     return {"message": "Hi"}
 
+
 handler = Mangum(app=app)
