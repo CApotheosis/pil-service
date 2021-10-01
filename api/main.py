@@ -25,8 +25,9 @@ table = dynamodb.Table("Announcements")
 def post_announcement(announcement: Announcement):
     announcement.guid = time_ns()
     announcement.created_date = str(datetime.fromtimestamp(announcement.guid / 10 ** 9).date())
+
     table.put_item(
-        item={
+        Item={
             "guid": announcement.guid,
             "title": announcement.title,
             "description": announcement.description,
