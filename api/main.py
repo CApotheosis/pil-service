@@ -3,6 +3,7 @@ from datetime import datetime
 from time import time_ns
 from typing import Optional
 
+import boto3
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 from pydantic import BaseModel
@@ -16,14 +17,22 @@ class Announcement(BaseModel):
 
 
 app = FastAPI()
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table("Announcements")
 
 
 @app.post("/announcements/")
 def post_announcement(announcement: Announcement):
-    # write data to dynamodb
     announcement.guid = time_ns()
     announcement.created_date = str(datetime.fromtimestamp(announcement.guid / 10 ** 9).date())
-    print("announcement", announcement)
+    table.put_item(
+        item={
+            "guid": announcement.guid,
+            "title": announcement.title,
+            "description": announcement.description,
+            "created_date": announcement.created_date,
+        }
+    )
 
     return announcement
 
@@ -35,27 +44,8 @@ def root():
 
 @app.get("/announcements")
 def get_announcements(page: int = 1):
-    # get elements from db
-    announcements = [
-        {
-            "guid": 21312421,
-            "title": "some title 1",
-            "description": "some description 1",
-            "date": "some date 1",
-        },
-        {
-            "guid": 421321321,
-            "title": "some title 2",
-            "description": "some description 2",
-            "date": "some date 2",
-        },
-        {
-            "guid": 43123122765,
-            "title": "some title 3",
-            "description": "some description 3",
-            "date": "some date 3",
-        },
-    ]
+    response = table.scan()
+    announcements = response["Items"]
     announcements_length = len(announcements)
     items_to_show = 10
 
@@ -77,26 +67,9 @@ def get_announcements(page: int = 1):
 
 @app.get("/announcements/{announcement_guid}")
 def get_announcement_property(announcement_guid: int):
-    announcements = [
-        {
-            "guid": 21312421,
-            "title": "some title 1",
-            "description": "some description 1",
-            "date": "some date 1",
-        },
-        {
-            "guid": 421321321,
-            "title": "some title 2",
-            "description": "some description 2",
-            "date": "some date 2",
-        },
-        {
-            "guid": 43123122765,
-            "title": "some title 3",
-            "description": "some description 3",
-            "date": "some date 3",
-        },
-    ]
+    response = table.scan()
+    announcements = response["Items"]
+
     if announcement := list(filter(lambda item: item["guid"] == announcement_guid, announcements)):
         return announcement[0]
     else:
