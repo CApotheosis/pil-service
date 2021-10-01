@@ -1,34 +1,39 @@
 """PIL Services - Assessment application module."""
+from datetime import datetime
+from time import time_ns
+from typing import Optional
+
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 from pydantic import BaseModel
 
 
 class Announcement(BaseModel):
-    guid: int
+    guid: Optional[int] = None
     title: str
     description: str
-    date: str
+    created_date: Optional[str] = None
 
 
 app = FastAPI()
 
 
 @app.post("/announcements/")
-def post_announcements(announcement: Announcement):
+def post_announcement(announcement: Announcement):
     # write data to dynamodb
-    data = []
-    print(announcement)
-    if data:
-        return {"status": 200, "message": "Successfully saved data into table."}
+    announcement.guid = time_ns()
+    announcement.created_date = str(datetime.fromtimestamp(announcement.guid / 10 ** 9).date())
+    print("announcement", announcement)
+
+    return announcement
 
 
 @app.get("/")
 def root():
-    return {"message": "Hi"}
+    return {"status": 200, "message": "application is running"}
 
 
-@app.get("/announcements/")
+@app.get("/announcements")
 def get_announcements(page: int = 1):
     # get elements from db
     announcements = [
@@ -93,7 +98,7 @@ def get_announcement_property(announcement_guid: int):
         },
     ]
     if announcement := list(filter(lambda item: item["guid"] == announcement_guid, announcements)):
-        return announcement
+        return announcement[0]
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
