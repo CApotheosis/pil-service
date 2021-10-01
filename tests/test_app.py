@@ -4,7 +4,9 @@ from api.main import app
 client = TestClient(app)
 
 
-def test_root():
+def test_root(mocker):
+    dynamodb_mock = mocker.MagicMock(name="bucket_mock")
+    mocker.patch("api.main.boto3.resource", return_value=dynamodb_mock)
     response = client.get("/")
 
     assert response.status_code == 200
