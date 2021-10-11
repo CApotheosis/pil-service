@@ -62,15 +62,15 @@ class DBStorageAccess:
                     "AttributeType": "S",
                 },
             ]
+
+            return self._db.create_table(
+                TableName=table_name,
+                KeySchema=key_schema,
+                AttributeDefinitions=attribute_definition,
+                BillingMode="PAY_PER_REQUEST",
+            )
         else:
             raise Exception("Wrong table name.")
-
-        return self._db.create_table(
-            TableName=table_name,
-            KeySchema=key_schema,
-            AttributeDefinitions=attribute_definition,
-            BillingMode="PAY_PER_REQUEST",
-        )
 
     @staticmethod
     def _prepare_announcement( announcement):
