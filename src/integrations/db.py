@@ -1,7 +1,6 @@
 """This module contains class, which is the interface to access a database."""
-import boto3
-
 from boto3.dynamodb.conditions import Key
+from fastapi import HTTPException
 
 ANNOUNCEMENTS_TABLE = "Announcements"
 ANNOUNCEMENTS_TABLE_KEYS = ("guid", "created_date")
@@ -9,18 +8,9 @@ ANNOUNCEMENTS_TABLE_KEYS = ("guid", "created_date")
 
 class DBStorageAccess:
     """Provides accessing to vacancies data."""
-    def __init__(self):
-        self._db = self._get_dynamo_db()
+    def __init__(self, dynamodb):
+        self._db = dynamodb
         self._announcements_table = self._get_table(ANNOUNCEMENTS_TABLE)
-
-    @staticmethod
-    def _get_dynamo_db():
-        """Creates a dynamodb instance.
-
-        Returns:
-            Any: dynamodb instance.
-        """
-        return boto3.resource("dynamodb")
 
     def _get_table(self, table_name):
         """Initializes a table by table name or creates new one.
@@ -106,7 +96,10 @@ class DBStorageAccess:
             KeyConditionExpression=Key(key_query).eq(search_value)
         )
 
-        return response["Items"]
+        if response["Items"]:
+            return response["Items"][0]
+        else:
+            raise HTTPException(status_code=400, detail="Item not found")
 
     def get_announcements(self, page, items_to_show_per_request):
         """Returns announcements in given range.

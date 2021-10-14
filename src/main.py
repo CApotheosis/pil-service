@@ -4,11 +4,17 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+import boto3
+
+from fastapi import FastAPI
 from mangum import Mangum
 from pydantic import BaseModel
 
 from src.integrations.db import DBStorageAccess
+
+app = FastAPI()
+resource = boto3.resource("dynamodb")
+dynamodb = DBStorageAccess(resource)
 
 
 class Announcement(BaseModel):
@@ -18,22 +24,19 @@ class Announcement(BaseModel):
     created_date: Optional[str] = None
 
 
-app = FastAPI()
-dynamodb = DBStorageAccess()
-
-
 @app.post("/announcements/")
 def post_announcement(announcement: Announcement):
     announcement.guid = uuid.uuid4().hex
     announcement.created_date = str(datetime.now())
 
-    dynamodb.save_announcement(
-        {
-            "guid": announcement.guid,
-            "title": announcement.title,
-            "description": announcement.description,
-            "created_date": announcement.created_date,
-        }
+    dynamodb.save_announcement(dict(
+            {
+                "guid": announcement.guid,
+                "title": announcement.title,
+                "description": announcement.description,
+                "created_date": announcement.created_date,
+            }
+        )
     )
 
     return announcement
@@ -61,10 +64,7 @@ def get_announcements(page: int = 1):
 def get_announcement_property(announcement_guid: str):
     announcement = dynamodb.get_announcement("guid", announcement_guid)
 
-    if announcement:
-        return announcement[0]
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+    return announcement
 
 
 handler = Mangum(app=app)
