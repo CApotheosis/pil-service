@@ -17,6 +17,23 @@ provider "aws" {
   region = "eu-central-1"
 }
 
+resource "aws_dynamodb_table" "announcements_table" {
+  name     = "Announcements"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key = "guid"
+  range_key = "created_date"
+
+  attribute {
+    name = "guid"
+    type = "S"
+  }
+
+  attribute {
+    name = "created_date"
+    type = "S"
+  }
+}
+
 resource "aws_s3_bucket" "lambda_bucket" {
   bucket = "bucket-for-pil-services"
 

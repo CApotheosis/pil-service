@@ -11,7 +11,7 @@
      "dynamodb:PutItem",
      "dynamodb:UpdateItem"
     ],
-    "Resource": "arn:aws:dynamodb:eu-central-1:351347433775:table/Announcements"
+    "Resource": "arn:aws:dynamodb:eu-central-1:351347433775:table/*"
    }
   ]
 }
