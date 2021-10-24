@@ -1,5 +1,6 @@
 """PIL Services - Assessment application module."""
 import uuid
+import logging
 
 from datetime import datetime
 from typing import Optional
@@ -15,6 +16,9 @@ from src.integrations.db import DBStorageAccess
 app = FastAPI()
 resource = boto3.resource("dynamodb")
 dynamodb = DBStorageAccess(resource)
+logging.basicConfig(format="%(asctime)s [%(levelname)s] %(message)s", datefmt='%d-%b-%y %H:%M:%S')
+logger = logging.getLogger("pil-services")
+logger.setLevel(logging.INFO)
 
 
 class Announcement(BaseModel):
@@ -28,7 +32,7 @@ class Announcement(BaseModel):
 def post_announcement(announcement: Announcement):
     announcement.guid = uuid.uuid4().hex
     announcement.created_date = str(datetime.now())
-
+    logger.info("created items")
     dynamodb.save_announcement(dict(
             {
                 "guid": announcement.guid,
@@ -44,20 +48,23 @@ def post_announcement(announcement: Announcement):
 
 @app.get("/")
 def root():
+    logger.info("Working", {"status": 200, "message": "application is running"})
     return {"status": 200, "message": "application is running"}
 
 
 @app.get("/announcements")
 def get_announcements(page: int = 1):
-    items_to_show_per_request = 10
-    announcements = dynamodb.get_announcements(page, items_to_show_per_request)
-    announcements_length = len(announcements)
+    # items_to_show_per_request = 10
+    # announcements = dynamodb.get_announcements(page, items_to_show_per_request)
+    # announcements_length = len(announcements)
+    logger.info("got items")
 
-    return {
-        "announcements": announcements,
-        "max_count": announcements_length,
-        "items_per_request": items_to_show_per_request,
-    }
+    # return {
+    #     "announcements": announcements,
+    #     "max_count": announcements_length,
+    #     "items_per_request": items_to_show_per_request,
+    # }
+    return {"message": "announcement"}
 
 
 @app.get("/announcements/{announcement_guid}")

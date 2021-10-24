@@ -18,10 +18,10 @@ provider "aws" {
 }
 
 resource "aws_dynamodb_table" "announcements_table" {
-  name     = "Announcements"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key = "guid"
-  range_key = "created_date"
+  name          = "Announcements"
+  billing_mode  = "PAY_PER_REQUEST"
+  hash_key      = "guid"
+  range_key     = "created_date"
 
   attribute {
     name = "guid"
@@ -35,7 +35,7 @@ resource "aws_dynamodb_table" "announcements_table" {
 }
 
 resource "aws_s3_bucket" "lambda_bucket" {
-  bucket = "bucket-for-pil-services"
+  bucket        = "bucket-for-pil-services"
 
   acl           = "private"
   force_destroy = true
@@ -44,7 +44,7 @@ resource "aws_s3_bucket" "lambda_bucket" {
 data "archive_file" "lambda_pil-services" {
   type = "zip"
 
-  source_dir  = "${path.module}/src"
+  source_dir  = "${path.module}/archive_from"
   output_path = "${path.module}/src.zip"
 }
 
@@ -68,6 +68,7 @@ resource "aws_lambda_function" "pil-services" {
   handler = "main.handler"
 
   source_code_hash = data.archive_file.lambda_pil-services.output_base64sha256
+  timeout = 15
 
   role = aws_iam_role.lambda_exec.arn
 }

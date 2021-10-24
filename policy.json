@@ -1,17 +1,28 @@
 {
   "Version": "2012-10-17",
-  "Statement":[{
-    "Effect": "Allow",
-    "Action": [
-     "dynamodb:BatchGetItem",
-     "dynamodb:GetItem",
-     "dynamodb:Query",
-     "dynamodb:Scan",
-     "dynamodb:BatchWriteItem",
-     "dynamodb:PutItem",
-     "dynamodb:UpdateItem"
-    ],
-    "Resource": "arn:aws:dynamodb:eu-central-1:351347433775:table/*"
-   }
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:ListTables"
+      ],
+      "Resource": "arn:aws:dynamodb:eu-central-1:351347433775:table/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:eu-central-1:351347433775:*"
+    }
   ]
 }
