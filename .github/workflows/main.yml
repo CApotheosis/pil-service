@@ -77,8 +77,8 @@ jobs:
         with:
           name: src
       - name: Creating S3 bucket
-        if: (aws s3api head-bucket --bucket p-services) == 200
-        run: aws s3 mb s3://p-services
+        run: aws s3api create-bucket --bucket p-services
+        continue-on-error: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
