@@ -50,7 +50,7 @@ jobs:
           cd ./venv/lib/python3.8/site-packages
           zip -r9 ../../../../src.zip .
       - name: Add API files to Zip file
-        run: cd pil-service && zip -g ../src.zip -r .
+        run: cd ./src && zip -g ../src.zip -r .
       - name: Upload zip file artifact
         uses: actions/upload-artifact@v2
         with:
@@ -90,7 +90,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       - name: Run terraform
-        run: terraform apply --auto-approve
+        run: terraform init && terraform apply --auto-approve
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
