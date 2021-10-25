@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from mangum import Mangum
 from pydantic import BaseModel
 
-from src.integrations.db import DBStorageAccess
+from integrations.db import DBStorageAccess
 
 app = FastAPI()
 resource = boto3.resource("dynamodb")
