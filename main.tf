@@ -4,10 +4,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.48.0"
     }
-    archive = {
-      source  = "hashicorp/archive"
-      version = "~> 2.2.0"
-    }
   }
 
   required_version = "~> 1.0"
@@ -34,40 +30,41 @@ resource "aws_dynamodb_table" "announcements_table" {
   }
 }
 
-resource "aws_s3_bucket" "lambda_bucket" {
-  bucket        = "bucket-for-pil-services"
+#resource "aws_s3_bucket" "lambda_bucket" {
+#  bucket        = "bucket-for-pil-services"
+#
+#  acl           = "private"
+#  force_destroy = true
+#}
 
-  acl           = "private"
-  force_destroy = true
-}
+#data "archive_file" "lambda_pil-services" {
+#  type = "zip"
+#
+#  source_dir  = "${path.module}/archive_from"
+#  output_path = "${path.module}/src.zip"
+#}
 
-data "archive_file" "lambda_pil-services" {
-  type = "zip"
-
-  source_dir  = "${path.module}/archive_from"
-  output_path = "${path.module}/src.zip"
-}
-
-resource "aws_s3_bucket_object" "lambda_pil-services" {
-  bucket = aws_s3_bucket.lambda_bucket.id
-
-  key    = "src.zip"
-  source = data.archive_file.lambda_pil-services.output_path
-
-  etag = filemd5(data.archive_file.lambda_pil-services.output_path)
-}
+#resource "aws_s3_bucket_object" "lambda_pil-services" {
+#  bucket = aws_s3_bucket.lambda_bucket.id
+#
+#  key    = "src.zip"
+#  source = data.archive_file.lambda_pil-services.output_path
+#
+#  etag = filemd5(data.archive_file.lambda_pil-services.output_path)
+#}
 
 # Creating a lambda function
 resource "aws_lambda_function" "pil-services" {
   function_name = "pil_services"
 
-  s3_bucket = aws_s3_bucket.lambda_bucket.id
-  s3_key    = aws_s3_bucket_object.lambda_pil-services.key
+  s3_bucket = "p-services"
+  s3_key    = "src.zip"
 
   runtime = "python3.8"
   handler = "main.handler"
 
-  source_code_hash = data.archive_file.lambda_pil-services.output_base64sha256
+  source_code_hash = filebase64sha256(s3_key)
+#  source_code_hash = data.archive_file.lambda_pil-services.output_base64sha256
   timeout = 15
 
   role = aws_iam_role.lambda_exec.arn
@@ -161,11 +158,11 @@ resource "aws_lambda_permission" "api_gw" {
 
 
 
-output "lambda_bucket_name" {
-  description = "Name of the S3 bucket used to store function code."
-
-  value = aws_s3_bucket.lambda_bucket.id
-}
+#output "lambda_bucket_name" {
+#  description = "Name of the S3 bucket used to store function code."
+#
+#  value = aws_s3_bucket.lambda_bucket.id
+#}
 
 output "function_name" {
   description = "Name of the Lambda function."
