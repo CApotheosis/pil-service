@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from mangum import Mangum
 from pydantic import BaseModel
 
-from src.integrations.db import DBStorageAccess
+from integrations.db import DBStorageAccess
 
 app = FastAPI()
 resource = boto3.resource("dynamodb")
@@ -32,16 +32,21 @@ class Announcement(BaseModel):
 def post_announcement(announcement: Announcement):
     announcement.guid = uuid.uuid4().hex
     announcement.created_date = str(datetime.now())
-    logger.info("created items")
-    dynamodb.save_announcement(dict(
-            {
-                "guid": announcement.guid,
-                "title": announcement.title,
-                "description": announcement.description,
-                "created_date": announcement.created_date,
-            }
+
+    try:
+        dynamodb.save_announcement(dict(
+                {
+                    "guid": announcement.guid,
+                    "title": announcement.title,
+                    "description": announcement.description,
+                    "created_date": announcement.created_date,
+                }
+            )
         )
-    )
+    except Exception:
+        logger.exception("Item creation failed.")
+    else:
+        logger.info("Successfully created item.")
 
     return announcement
 
@@ -54,17 +59,22 @@ def root():
 
 @app.get("/announcements")
 def get_announcements(page: int = 1):
-    # items_to_show_per_request = 10
-    # announcements = dynamodb.get_announcements(page, items_to_show_per_request)
-    # announcements_length = len(announcements)
-    logger.info("got items")
+    items_to_show_per_request = 10
+    announcements = dynamodb.get_announcements(page, items_to_show_per_request)
+    announcements_length = len(announcements)
 
-    # return {
-    #     "announcements": announcements,
-    #     "max_count": announcements_length,
-    #     "items_per_request": items_to_show_per_request,
-    # }
-    return {"message": "announcement"}
+    if announcements:
+        logger.info("Got items.")
+
+        return {
+            "announcements": announcements,
+            "max_count": announcements_length,
+            "items_per_request": items_to_show_per_request,
+        }
+    else:
+        logger.exception("Failed to fetch items or got an empty list.")
+
+        return announcements
 
 
 @app.get("/announcements/{announcement_guid}")
