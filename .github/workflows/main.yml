@@ -77,7 +77,7 @@ jobs:
         with:
           name: src
       - name: Creating S3 bucket
-        run: aws s3api create-bucket --bucket p-services --region eu-central-1
+        run: aws s3api create-bucket --bucket p-services
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
