@@ -77,7 +77,7 @@ jobs:
         with:
           name: src
       - name: Creating S3 bucket
-        if: aws s3api head-bucket --bucket p-services == 200
+        if: (aws s3api head-bucket --bucket p-services) == 200
         run: aws s3 mb s3://p-services
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
